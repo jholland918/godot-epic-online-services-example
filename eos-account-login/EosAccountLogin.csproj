@@ -2,4 +2,72 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
+
+  <!-- 
+    Configure base EOS settings (sdk directory and target platform inside DefineConstants).
+  -->
+  <PropertyGroup>
+    <DefineConstants>EOS_PLATFORM_WINDOWS_64;$(DefineConstants);</DefineConstants>
+    <EosSdkDirectory>$(MSBuildProjectDirectory)\..\EOS-SDK\EOS-SDK-CSharp-16697186-v1.13\SDK</EosSdkDirectory>
+  </PropertyGroup>
+
+  <!-- 
+    Include the C# EOS SDK source files in the project.
+    https://dev.epicgames.com/docs/services/en-US/CSharp/GettingStarted/index.html#integration
+  -->
+  <ItemGroup>
+    <Compile Include="$(EosSdkDirectory)\Source\Core\**">
+      <Link>EOS-SDK\Core\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="$(EosSdkDirectory)\Source\Generated\**">
+      <Link>EOS-SDK\Generated\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <!-- 
+    Configure EOS platform settings based on EOS Conditional compilation symbols. 
+    https://dev.epicgames.com/docs/services/en-US/CSharp/GettingStarted/index.html#integration
+    
+    The Epic.OnlineServices.Config (\EOS-SDK\Source\Core\Config.cs)
+    determines the EOS library binary name to target based on the 
+    following compilation symbols.
+        
+      EOS_PLATFORM_WINDOWS_32 
+      EOS_PLATFORM_WINDOWS_64 
+      EOS_PLATFORM_OSX 
+      EOS_PLATFORM_LINUX 
+      EOS_PLATFORM_IOS 
+      EOS_PLATFORM_ANDROID     
+    -->
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(EOS_PLATFORM_WINDOWS_32))">
+      <PropertyGroup>
+        <EosSdkPlatform>Win32</EosSdkPlatform>
+        <XAudio2Platform>x86</XAudio2Platform>
+      </PropertyGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains(EOS_PLATFORM_WINDOWS_64))">
+      <PropertyGroup>
+        <EosSdkPlatform>Win64</EosSdkPlatform>
+        <XAudio2Platform>x64</XAudio2Platform>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <EosSdkPlatform></EosSdkPlatform>
+        <XAudio2Platform></XAudio2Platform>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <!-- 
+    Ensure the appropriate EOS library binary files for the target platform is accessible by the application.
+    https://dev.epicgames.com/docs/services/en-US/CSharp/GettingStarted/index.html#integration
+  -->
+  <PropertyGroup>
+    <PreBuildEvent>
+      xcopy /D /Y /R /Q "$(EosSdkDirectory)\Bin\EOSSDK-$(EosSdkPlatform)-Shipping.dll" "$(MSBuildProjectDirectory)"
+      xcopy /D /Y /R /Q "$(EosSdkDirectory)\Bin\$(XAudio2Platform)\xaudio2_9redist.dll" "$(MSBuildProjectDirectory)"
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>
