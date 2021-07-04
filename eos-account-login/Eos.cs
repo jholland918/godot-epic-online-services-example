@@ -11,14 +11,21 @@ public class Eos
 
     public void Initialize()
     {
+        var config = new ConfigFile();
+        Error error = config.Load("res://eos.cfg"); // not checked into source control
+        if (!error.HasFlag(Error.Ok))
+        {
+            throw new Exception("Probled loading eos.cfg");
+        }
+
         // Set these values as appropriate. For more information, see the Developer Portal documentation.
         string productName = "MyCSharpApplication";
         string productVersion = "1.0";
-        string productId = "...";
-        string sandboxId = "...";
-        string deploymentId = "...";
-        string clientId = "...";
-        string clientSecret = "...";
+        string productId = config.GetValue("main", "product_id").ToString();
+        string sandboxId = config.GetValue("main", "sandbox_id").ToString();
+        string deploymentId = config.GetValue("main", "deployment_id").ToString();
+        string clientId = config.GetValue("main", "client_id").ToString();
+        string clientSecret = config.GetValue("main", "client_secret").ToString();
 
         var initializeOptions = new InitializeOptions()
         {
