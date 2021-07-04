@@ -20,3 +20,5 @@ margin_top = 24.0
 margin_right = 114.0
 margin_bottom = 38.0
 text = "User: Anonymous"
+
+[node name="EosTimer" type="Timer" parent="."]
