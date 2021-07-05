@@ -4,10 +4,12 @@ using Epic.OnlineServices;
 using Epic.OnlineServices.Auth;
 using Epic.OnlineServices.Logging;
 using Epic.OnlineServices.Platform;
+using Epic.OnlineServices.UserInfo;
 
 public class Eos
 {
     private PlatformInterface _platform;
+    private UserInfoInterface _userInfo;
 
     public void Initialize()
     {
@@ -64,6 +66,8 @@ public class Eos
         {
             throw new Exception("Failed to create platform");
         }
+
+        _userInfo = _platform.GetUserInfoInterface();
     }
 
     public void Login(Action<string> onLogin)
@@ -99,7 +103,17 @@ public class Eos
             if (loginCallbackInfo.ResultCode == Result.Success)
             {
                 Console.WriteLine("Login succeeded");
-                onLogin("Login succeeded");
+                onLogin("Login succeeded, getting user info...");
+
+                var userInfoOptions = new CopyUserInfoOptions
+                {
+                    LocalUserId = loginCallbackInfo.LocalUserId,
+                    TargetUserId = loginCallbackInfo.LocalUserId
+                };
+
+                _userInfo.CopyUserInfo(userInfoOptions, out UserInfoData userInfoData);
+
+                onLogin($"User: {userInfoData.DisplayName}");
             }
             else if (Common.IsOperationComplete(loginCallbackInfo.ResultCode))
             {

@@ -16,6 +16,7 @@ public class Main : VBoxContainer
     private void _on_Login_pressed()
     {
         GD.Print("Login pressed!");
+        _userLabel.Text = "Logging in...";
         _state.Eos.Login(OnAccountLogin);
     }
 
